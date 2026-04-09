@@ -1,33 +1,24 @@
-# Google Search Console Skill for Claude Code
+# Google Search Console — MCP Server & AI Skill
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Node.js 18+](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/)
 [![MCP](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io/)
 
-A Claude Code skill for SEO performance analysis. Ask Claude about your search queries, click-through rates, impressions, average positions, and page performance — powered by the Google Search Console API via MCP.
-
----
+Query your Google Search Console data from any MCP-compatible client — search queries, click-through rates, impressions, average positions, quick wins, and page performance. Works with Claude Desktop, Claude Code, Cursor, Windsurf, Cline, and any tool supporting the [Model Context Protocol](https://modelcontextprotocol.io/).
 
 ## How It Works
 
-- Connects Claude Code to your Search Console property through the `mcp-server-gsc` MCP server
-- Claude can query search analytics, find quick-win keywords, analyze page performance, and track position changes
-- One tool (`search_analytics`) handles all queries — dimensions, filters, and date ranges let you slice the data any way you need
+This project packages the [`mcp-server-gsc`](https://github.com/ahonn/mcp-server-gsc) MCP server with ready-to-use configuration and an optional Claude Code skill file for guided SEO workflows.
 
----
+The MCP server connects to the Search Console API using a Google service account and exposes a powerful `search_analytics` tool that any MCP client can call.
 
 ## Prerequisites
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed
-- Node.js 18+
+- **Node.js 18+**
 - A Google Cloud project with the **Search Console API** enabled
 - A service account added as **property administrator** in Search Console
 
----
-
-## Setup — MCP Server (Free & Open Source)
-
-This skill uses [`mcp-server-gsc`](https://github.com/ahonn/mcp-server-gsc) by [ahonn](https://github.com/ahonn).
+## Setup
 
 ### Step 1: Create a Google Cloud Service Account
 
@@ -38,9 +29,10 @@ This skill uses [`mcp-server-gsc`](https://github.com/ahonn/mcp-server-gsc) by [
 5. In [Google Search Console](https://search.google.com/search-console/), go to **Settings > Users and permissions > Add user**
 6. Add the service account email (e.g. `my-sa@my-project.iam.gserviceaccount.com`) as **Owner**
 
-### Step 2: Add MCP Server to Claude Code
+### Step 2: Add MCP Server to Your Client
 
-Create or edit `.mcp.json` in your project root (or `~/.claude/.mcp.json` for global access):
+<details open>
+<summary><strong>Claude Desktop</strong> — <code>claude_desktop_config.json</code></summary>
 
 ```json
 {
@@ -56,31 +48,44 @@ Create or edit `.mcp.json` in your project root (or `~/.claude/.mcp.json` for gl
 }
 ```
 
-Replace `/path/to/your-credentials.json` with the actual path to your downloaded service account key.
+Config location: `%APPDATA%\Claude\claude_desktop_config.json` (Windows) or `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS)
 
-### Step 3: Install the Skill
+</details>
 
-Copy `SKILL.md` to your Claude Code skills directory:
+<details>
+<summary><strong>Claude Code</strong> — <code>.mcp.json</code> (project root)</summary>
 
-```bash
-mkdir -p ~/.claude/skills/google-search-console
-cp SKILL.md ~/.claude/skills/google-search-console/SKILL.md
+```json
+{
+  "mcpServers": {
+    "gsc": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-gsc"],
+      "env": {
+        "GOOGLE_APPLICATION_CREDENTIALS": "/path/to/your-credentials.json"
+      }
+    }
+  }
+}
 ```
 
-Restart Claude Code. The skill is now active.
+</details>
 
----
+<details>
+<summary><strong>Cursor / Windsurf / Cline</strong></summary>
 
-## Alternative Setup — Composio / Rube MCP (Freemium)
+Use the same JSON structure above in your editor's MCP configuration:
+- **Cursor:** `.cursor/mcp.json`
+- **Windsurf:** `~/.codeium/windsurf/mcp_config.json`
+- **Cline:** VS Code settings > Cline MCP Servers
 
-If you prefer a managed OAuth flow instead of a service account:
+</details>
 
-- [Composio](https://composio.dev) — Free tier: 1,000 requests/day. Pro: $25/month. See [pricing](https://composio.dev/pricing).
-- [Rube](https://rube.app/mcp) — Managed MCP hosting with Google Search Console support.
+Replace `/path/to/your-credentials.json` with the actual path to your downloaded service account key.
 
-These handle authentication for you but introduce a third-party dependency.
+### Step 3: Verify
 
----
+Restart your MCP client and ask: *"Show me my top search queries for the last 7 days"*
 
 ## Available Tool
 
@@ -117,9 +122,9 @@ The MCP server exposes one powerful tool: **`search_analytics`**
 }
 ```
 
----
-
 ## Usage Examples
+
+Ask your AI assistant in natural language:
 
 - "What are my top 20 search queries this month?"
 - "Find quick-win keywords — queries ranking positions 4-20 with high impressions"
@@ -128,25 +133,37 @@ The MCP server exposes one powerful tool: **`search_analytics`**
 - "Which queries am I ranking for in France?"
 - "Show me pages that lost the most clicks compared to last month"
 
----
+## Use as a Claude Code Skill
+
+This repo includes a `SKILL.md` file that turns it into a [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) skill with 6 guided SEO workflows and an interactive setup assistant.
+
+```bash
+mkdir -p ~/.claude/skills/google-search-console
+cp SKILL.md ~/.claude/skills/google-search-console/SKILL.md
+```
+
+The skill will walk users through MCP server setup if it's not already configured.
+
+## Alternative MCP — Composio / Rube (Freemium)
+
+If you prefer a managed OAuth flow instead of a service account:
+
+- [Composio](https://composio.dev) — Free tier: 1,000 requests/day. Pro: $25/month. See [pricing](https://composio.dev/pricing).
+- [Rube](https://rube.app/mcp) — Managed MCP hosting with Search Console support.
 
 ## Credits
 
 - **MCP Server:** [mcp-server-gsc](https://github.com/ahonn/mcp-server-gsc) by [ahonn](https://github.com/ahonn)
 - **Alternative MCP:** [Composio](https://composio.dev) / [Rube](https://rube.app/mcp)
 
----
-
 ## Part of the Marketing Suite
 
-| Skill | Repository |
-|-------|------------|
-| Google Search Console | **You are here** |
-| [Google Analytics](https://github.com/judicael-s/google-analytics-skill) | GA4 performance analysis |
-| [Google Trends](https://github.com/judicael-s/google-trends-skill) | Trend research and keyword discovery |
-
----
+| Tool | Repository |
+|------|------------|
+| Google Trends | [judicael-s/google-trends-skill](https://github.com/judicael-s/google-trends-skill) |
+| Google Analytics | [judicael-s/google-analytics-skill](https://github.com/judicael-s/google-analytics-skill) |
+| **Google Search Console** | **This repo** |
 
 ## License
 
-[MIT](LICENSE) - Jules Sauvajol
+[MIT](LICENSE)
