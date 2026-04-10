@@ -163,6 +163,7 @@ If you prefer a managed OAuth flow instead of a service account:
 | Google Trends | [judicael-s/google-trends-skill](https://github.com/judicael-s/google-trends-skill) |
 | Google Analytics | [judicael-s/google-analytics-skill](https://github.com/judicael-s/google-analytics-skill) |
 | **Google Search Console** | **This repo** |
+| Copywriting | [judicael-s/copywriting-skill](https://github.com/judicael-s/copywriting-skill) |
 
 ## License
 
