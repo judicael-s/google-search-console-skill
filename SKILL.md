@@ -64,9 +64,28 @@ You also need the user's Search Console property URL (ask if not provided):
 - URL-prefix property: `https://example.com/`
 - Domain property: `sc-domain:example.com`
 
+## MCP Tool Reference
+
+The actual deployed tool names on this workspace are namespaced. Map the names used elsewhere in this skill to the canonical calls:
+
+| Capability | Exact tool name |
+|---|---|
+| Quick wins (positions 4-20, high impressions) | `mcp__mcp-router__detect_quick_wins` |
+| Enriched query + page analytics | `mcp__mcp-router__enhanced_search_analytics` |
+| Standard analytics | `mcp__mcp-router__search_analytics` |
+| URL inspection (indexing status) | `mcp__mcp-router__index_inspect` |
+| Site management | `mcp__mcp-router__list_sites` |
+| Sitemap management | `mcp__mcp-router__list_sitemaps`, `mcp__mcp-router__get_sitemap`, `mcp__mcp-router__submit_sitemap` |
+
+When this skill text says "call `search_analytics`", the actual call is `mcp__mcp-router__search_analytics`. Same pattern for the others. Use the qualified names — bare names will 404.
+
+---
+
 ## Parse the Request
 
 Before calling the tool, extract these from the user's question:
+
+**GSC live-data primacy rule:** when both Google Trends and GSC could answer an opportunity question for a site you already operate, prefer GSC for any site with >100 indexed pages. Trends shows relative interest across the open web; GSC shows actual impressions on YOUR site. The latter is truth for opportunity sizing — use Trends only as a complement for seasonality / direction signals.
 
 - **siteUrl** — the property URL. Ask the user if unknown.
 - **Date range** — map natural language to `startDate` / `endDate` in `YYYY-MM-DD`:
@@ -178,6 +197,22 @@ Identify:
 - Top countries by clicks and impressions
 - Countries with high impressions but low CTR (localization opportunity)
 - Unexpected geographic traffic (may indicate content resonating in new markets)
+
+### 7. 28-Day Audit Loop
+
+Use as the standing cadence for production sites. Run every 28 days to compound signal across cycles.
+
+**Sequence:**
+1. Call `mcp__mcp-router__detect_quick_wins` (positions 4-20, high impressions) — surfaces refresh candidates already close to page 1.
+2. Call `mcp__mcp-router__enhanced_search_analytics` with `dimensions: ["page","query"]` filtered to last 28 days — surfaces top-page query mix + CTR pressure points.
+3. Cross-reference any page with ≥80 sessions against the `google-analytics` skill Workflow 6 (Conversion-Crater Detection). A page with ≥80 sessions and 0 conversions is a CTA audit, not a content audit.
+4. Triage every flagged item into the Tier-A / Tier-B / DROP framework (defined in the `seo-copywriting` skill Post-Publish Audit Loop). Use the drop thresholds in `references/seo-benchmarks.md` to decide deprecation candidates.
+
+**Seasonal sites (exam-anchored, event-anchored, holiday-spike):** lock content freeze ~30 days pre-event to respect indexation latency. No new articles past that date for the current cycle — refresh existing only.
+
+**Output:** a single triage list with three buckets (Tier-A actions this week, Tier-B research queue, DROP candidates) — each entry tagged with the GSC metric that earned it the bucket.
+
+---
 
 ## Output Format
 
